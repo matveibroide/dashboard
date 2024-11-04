@@ -4,20 +4,40 @@ import data from "./API/API"; // Import your mock data
 const CircleWithSmallCircles = () => {
   const [activeFilter, setActiveFilter] = useState(null);
   const [closestToFilter, setClosestToFilter] = useState([]);
+  const [activeSkils, setActiveSkills] = useState([]);
+
+  const getRelatedItems = useMemo(() => {
+    if (!activeFilter) return { mainSkills: [], otherSkills: [] };
+
+    const selectedItem = data.find((item) => item.name === activeFilter);
+    if (selectedItem) {
+      return {
+        mainSkills: selectedItem.mainSkills,
+        otherSkills: selectedItem.otherSkills,
+      };
+    }
+  }, [activeFilter, data, closestToFilter]);
+
   const innerRadius = 55;
   const outerRadius = 135;
   const smallCircleRadius = 5;
   const centerX = 150;
   const centerY = 150;
 
-  const innerSmallCirclesArr = useMemo(() => data.map((item) => item.name), [data]);
-  const outerSmallCirclesArr = useMemo(() => {
-    return data.reduce((acc, n) => {
+  const innerSmallCirclesArr = useMemo(
+    () => data.map((item) => item.name),
+    [data]
+  );
+  let outerSmallCirclesArr = useMemo(() => {
+    const uniqueSkills = new Set();
+
+    data.forEach((n) => {
       [...n.mainSkills, ...n.otherSkills].forEach((skill) => {
-        if (!acc.includes(skill)) acc.push(skill);
+        uniqueSkills.add(skill);
       });
-      return acc;
-    }, []);
+    });
+
+    return Array.from(uniqueSkills);
   }, [data]);
 
   const innerAngleStep = (2 * Math.PI) / innerSmallCirclesArr.length;
@@ -44,60 +64,30 @@ const CircleWithSmallCircles = () => {
     return distances.slice(0, numberOfClosest).map((item) => item.skill);
   };
 
-  const getRelatedItems = useMemo(() => {
-    if (!activeFilter) return { mainSkills: [], otherSkills: [] };
-
-    const selectedItem = data.find((item) => item.name === activeFilter);
-    if (selectedItem) {
-      return {
-        mainSkills: selectedItem.mainSkills,
-        otherSkills: selectedItem.otherSkills,
-      };
-    } else {
-      const relatedNames = data
-        .filter(
-          (item) =>
-            item.mainSkills.includes(activeFilter) ||
-            item.otherSkills.includes(activeFilter)
-        )
-        .map((item) => item.name);
-      return {
-        mainSkills: relatedNames,
-        otherSkills: [],
-      };
-    }
-  }, [activeFilter, data]);
-
   useEffect(() => {
     const closestOuterCircles = getClosestOuterCircles(
       activeFilter,
       getRelatedItems.mainSkills.length + getRelatedItems.otherSkills.length
     );
     setClosestToFilter(closestOuterCircles);
-  }, [activeFilter, getRelatedItems]);
+  }, [activeFilter]);
 
-  const closeIndex = [];
-  const relatedIndex = [];
+  const { mainSkills, otherSkills } = getRelatedItems;
 
-  closestToFilter.forEach((item) => {
-    const index = outerSmallCirclesArr.indexOf(item);
-    if (index !== -1) closeIndex.push(index);
-  });
+  const filteredClose = closestToFilter.filter(
+    (item) => ![...mainSkills, ...otherSkills].includes(item)
+  );
 
-  [...getRelatedItems.mainSkills, ...getRelatedItems.otherSkills].forEach((item) => {
-    const index = outerSmallCirclesArr.indexOf(item);
-    if (index !== -1) relatedIndex.push(index);
-  });
+  const filteredSkills = [...mainSkills, ...otherSkills].filter(
+    (item) => !closestToFilter.includes(item)
+  );
 
-  if (closeIndex.length > 0 && closeIndex.length <= relatedIndex.length) {
-    closeIndex.forEach((closeIdx, i) => {
-      const relatedIdx = relatedIndex[i];
-      if (relatedIdx !== undefined) {
-        const temp = outerSmallCirclesArr[closeIdx];
-        outerSmallCirclesArr[closeIdx] = outerSmallCirclesArr[relatedIdx];
-        outerSmallCirclesArr[relatedIdx] = temp;
-      }
-    });
+  for (let i = 0; i < filteredClose.length; i++) {
+    const close = outerSmallCirclesArr.indexOf(filteredClose[i]);
+    const skill = outerSmallCirclesArr.indexOf(filteredSkills[i]);
+    let temp = outerSmallCirclesArr[close];
+    outerSmallCirclesArr[close] = outerSmallCirclesArr[skill];
+    outerSmallCirclesArr[skill] = temp;
   }
 
   const innerSmallCircles = innerSmallCirclesArr.map((name, index) => {
@@ -139,7 +129,9 @@ const CircleWithSmallCircles = () => {
           cy={y}
           r={smallCircleRadius}
           fill="red"
-          onClick={() => setActiveFilter(skill)}
+          onClick={() => {
+            setActiveFilter(skill);
+          }}
         />
         <text
           x={x}
