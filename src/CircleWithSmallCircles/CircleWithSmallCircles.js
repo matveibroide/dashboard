@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import data from "../API/API"; // Import your mock data
 import "./CircleWithSmallCircles.css";
-import { svg } from "d3";
 
 const CircleWithSmallCircles = () => {
   const [activeFilter, setActiveFilter] = useState(null);
@@ -23,6 +22,7 @@ const CircleWithSmallCircles = () => {
 
   const innerAngleStep = (2 * Math.PI) / innerSmallCircles.length;
   const outerAngleStep = (2 * Math.PI) / outerSmallCircles.length;
+  const startingAngle = -Math.PI / 2; // Set the starting angle
 
   useEffect(() => {
     if (!activeFilter) {
@@ -37,12 +37,12 @@ const CircleWithSmallCircles = () => {
         const skillsNumber = mainSkills.length + otherSkills.length;
 
         const innerIndex = innerSmallCircles.indexOf(activeFilter);
-        const innerAngle = innerIndex * innerAngleStep;
+        const innerAngle = startingAngle + innerIndex * innerAngleStep;
         const innerX = centerX + innerRadius * Math.cos(innerAngle);
         const innerY = centerY + innerRadius * Math.sin(innerAngle);
 
         const distances = outerSmallCircles.map((skill, index) => {
-          const outerAngle = index * outerAngleStep;
+          const outerAngle = startingAngle + index * outerAngleStep;
           const outerX = centerX + outerRadius * Math.cos(outerAngle);
           const outerY = centerY + outerRadius * Math.sin(outerAngle);
 
@@ -77,7 +77,7 @@ const CircleWithSmallCircles = () => {
         setLines([
           ...mainSkills.map((relatedSkill) => {
             const outerIndex = outerSmallCirclesArr.indexOf(relatedSkill);
-            const outerAngle = outerIndex * outerAngleStep;
+            const outerAngle = startingAngle + outerIndex * outerAngleStep;
             const outerX = centerX + outerRadius * Math.cos(outerAngle);
             const outerY = centerY + outerRadius * Math.sin(outerAngle);
 
@@ -97,7 +97,7 @@ const CircleWithSmallCircles = () => {
           }),
           ...otherSkills.map((relatedSkill) => {
             const outerIndex = outerSmallCirclesArr.indexOf(relatedSkill);
-            const outerAngle = outerIndex * outerAngleStep;
+            const outerAngle = startingAngle + outerIndex * outerAngleStep;
             const outerX = centerX + outerRadius * Math.cos(outerAngle);
             const outerY = centerY + outerRadius * Math.sin(outerAngle);
 
@@ -147,7 +147,7 @@ const CircleWithSmallCircles = () => {
         {lines}
 
         {innerSmallCircles.map((name, index) => {
-          const angle = index * innerAngleStep;
+          const angle = startingAngle + index * innerAngleStep; // Apply startingAngle
           const x = centerX + innerRadius * Math.cos(angle);
           const y = centerY + innerRadius * Math.sin(angle);
           const selected = name === activeFilter;
@@ -187,52 +187,55 @@ const CircleWithSmallCircles = () => {
           );
         })}
         {outerSmallCircles.map((skill, index) => {
-  const angle = index * outerAngleStep;
-  const x = centerX + outerRadius * Math.cos(angle);
-  const y = centerY + outerRadius * Math.sin(angle);
+          const angle = startingAngle + index * outerAngleStep; // Apply startingAngle
+          const x = centerX + outerRadius * Math.cos(angle);
+          const y = centerY + outerRadius * Math.sin(angle);
 
-  // Adjust text positioning based on angle
-  let textAnchor = "middle";
-  let dy = 0;
+          // Adjust text positioning based on angle
+          let textAnchor = "middle";
+          let dy = 0;
 
-  // Determine text position based on angle
-  if (angle >= 0 && angle < Math.PI / 2) { // Bottom-right quadrant
-    textAnchor = "start";
-    dy = "1em";
-  } else if (angle >= Math.PI / 2 && angle < Math.PI) { // Bottom-left quadrant
-    textAnchor = "end";
-    dy = "1em";
-  } else if (angle >= Math.PI && angle < (3 * Math.PI) / 2) { // Top-left quadrant
-    textAnchor = "end";
-    dy = "-0.5em";
-  } else { // Top-right quadrant
-    textAnchor = "start";
-    dy = "-0.5em";
-  }
+          // Determine text position based on angle
+          if (angle >= 0 && angle < Math.PI / 2) {
+            // Bottom-right quadrant
+            textAnchor = "start";
+            dy = "1em";
+          } else if (angle >= Math.PI / 2 && angle < Math.PI) {
+            // Bottom-left quadrant
+            textAnchor = "end";
+            dy = "1em";
+          } else if (angle >= Math.PI && angle < (3 * Math.PI) / 2) {
+            // Top-left quadrant
+            textAnchor = "end";
+            dy = "-0.5em";
+          } else {
+            // Top-right quadrant
+            textAnchor = "start";
+            dy = "-0.5em";
+          }
 
-  return (
-    <g key={`outer-${index}`}>
-      <circle
-        cx={x}
-        cy={y}
-        r={smallCircleRadius}
-        fill="#FF7A00"
-        onClick={() => setActiveFilter(skill)}
-      />
-      <text
-        x={x}
-        y={y}
-        textAnchor={textAnchor}
-        dy={dy}
-        fontSize="6"
-        fill="black"
-      >
-        {skill}
-      </text>
-    </g>
-  );
-})}
-
+          return (
+            <g key={`outer-${index}`}>
+              <circle
+                cx={x}
+                cy={y}
+                r={smallCircleRadius}
+                fill="#FF7A00"
+                onClick={() => setActiveFilter(skill)}
+              />
+              <text
+                x={x}
+                y={y}
+                textAnchor={textAnchor}
+                dy={dy}
+                fontSize="6"
+                fill="black"
+              >
+                {skill}
+              </text>
+            </g>
+          );
+        })}
       </svg>
       {activeFilter && (
         <p style={{ position: "absolute", top: 10, left: 10 }}>

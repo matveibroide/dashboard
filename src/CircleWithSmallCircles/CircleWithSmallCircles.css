@@ -12,6 +12,10 @@
   animation: dash 8s linear forwards;
 }
 
+circle {
+  cursor: pointer;
+}
+
 @keyframes dash {
   to {
     stroke-dashoffset: 0;
