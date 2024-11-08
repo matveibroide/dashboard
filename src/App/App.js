@@ -1,6 +1,6 @@
 import React from "react";
-import CircleWithSmallCircles from "../CircleWithSmallCircles";
-import './App.css'
+import "./App.css";
+import CircleWithSmallCircles from "../CircleWithSmallCircles/CircleWithSmallCircles";
 
 const App = () => {
   return (
