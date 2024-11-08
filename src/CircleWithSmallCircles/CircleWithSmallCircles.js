@@ -13,6 +13,7 @@ const CircleWithSmallCircles = () => {
     )
   );
   const [lines, setLines] = useState([]);
+  const [activeSkills, setActiveSkills] = useState([]);
 
   const innerRadius = 55;
   const outerRadius = 130;
@@ -24,6 +25,8 @@ const CircleWithSmallCircles = () => {
   const outerAngleStep = (2 * Math.PI) / outerSmallCircles.length;
   const startingAngle = -Math.PI / 2; // Set the starting angle
 
+  const calculateClosestCircles = (filter, circlesNumber) => {};
+
   useEffect(() => {
     if (!activeFilter) {
       setLines([]);
@@ -34,6 +37,7 @@ const CircleWithSmallCircles = () => {
       const selectedItem = data.find((item) => item.name === activeFilter);
       if (selectedItem) {
         const { mainSkills, otherSkills } = selectedItem;
+        setActiveSkills([...mainSkills, ...otherSkills]);
         const skillsNumber = mainSkills.length + otherSkills.length;
 
         const innerIndex = innerSmallCircles.indexOf(activeFilter);
@@ -117,6 +121,7 @@ const CircleWithSmallCircles = () => {
           }),
         ]);
       }
+    } else if (outerSmallCircles.includes(activeFilter)) {
     }
   }, [activeFilter]);
 
@@ -156,13 +161,23 @@ const CircleWithSmallCircles = () => {
             <g key={`inner-${index}`}>
               {selected ? (
                 <svg>
+                  {/* Outer Circle (First colored border) */}
                   <circle
-                    stroke="#fff"
-                    strokeWidth="4" // Updated to camelCase
                     cx={x}
                     cy={y}
-                    r={smallCircleRadius}
+                    r={smallCircleRadius + 1} // Adjust the radius to make the border visible
+                    fill="none"
+                    stroke="#00A372" // Green border for selected state
+                    strokeWidth="1" // Outer border width
+                  />
+                  {/* Inner Circle (Second colored border) */}
+                  <circle
+                    cx={x}
+                    cy={y}
+                    r={smallCircleRadius} // Original small circle radius
                     fill="#00A372" // Green fill when selected
+                    stroke="#fff" // White border inside the green
+                    strokeWidth="2" // Inner border width
                   />
                 </svg>
               ) : (
@@ -190,6 +205,8 @@ const CircleWithSmallCircles = () => {
           const angle = startingAngle + index * outerAngleStep; // Apply startingAngle
           const x = centerX + outerRadius * Math.cos(angle);
           const y = centerY + outerRadius * Math.sin(angle);
+          const selected = skill === activeFilter;
+          const related = activeSkills.includes(skill);
 
           // Adjust text positioning based on angle
           let textAnchor = "middle";
@@ -216,13 +233,36 @@ const CircleWithSmallCircles = () => {
 
           return (
             <g key={`outer-${index}`}>
-              <circle
-                cx={x}
-                cy={y}
-                r={smallCircleRadius}
-                fill="#FF7A00"
-                onClick={() => setActiveFilter(skill)}
-              />
+              {selected ? (
+                <svg>
+                  {/* Outer Circle (First colored border) */}
+                  <circle
+                    cx={x}
+                    cy={y}
+                    r={smallCircleRadius + 1} // Adjust the radius to make the border visible
+                    fill="none"
+                    stroke="#FF7A00" // Green border for selected state
+                    strokeWidth="1" // Outer border width
+                  />
+                  {/* Inner Circle (Second colored border) */}
+                  <circle
+                    cx={x}
+                    cy={y}
+                    r={smallCircleRadius} // Original small circle radius
+                    fill="#FF7A00" // Green fill when selected
+                    stroke="#fff" // White border inside the green
+                    strokeWidth="2" // Inner border width
+                  />
+                </svg>
+              ) : (
+                <circle
+                  cx={x}
+                  cy={y}
+                  r={smallCircleRadius}
+                  fill={related ? "#FF7A00" : "#FFD4AD"} // Gray fill when not selected
+                  onClick={() => setActiveFilter(skill)}
+                />
+              )}
               <text
                 x={x}
                 y={y}
