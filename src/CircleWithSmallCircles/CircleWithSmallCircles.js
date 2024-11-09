@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import data from "../API/API"; // Import your mock data
 import "./CircleWithSmallCircles.css";
 import { swapCirclesUtil } from "../utils/utils";
+import LinesBetweenCircles from "../LinesBetweenCircles/LinesBetweemCircles";
 
 const CircleWithSmallCircles = () => {
   const [activeFilter, setActiveFilter] = useState(null);
@@ -93,7 +94,7 @@ const CircleWithSmallCircles = () => {
       console.log(relatedJobsMain, relatedJobsOther);
       console.log(closestJobCircles);
 
-    /*   const innerSmallCirclesArr = swapCirclesUtil(
+      /*   const innerSmallCirclesArr = swapCirclesUtil(
         innerSmallCircles,
         closestJobCircles,
         [...relatedJobsMain, relatedJobsOther]
@@ -110,12 +111,26 @@ const CircleWithSmallCircles = () => {
 
   return (
     <div className="container">
+      
       <svg
         width="90%"
         height="90%"
         viewBox="0 0 300 300"
         preserveAspectRatio="xMidYMid meet"
       >
+        <LinesBetweenCircles
+                data={data}
+                activeFilter={activeFilter}
+                innerSmallCircles={innerSmallCircles}
+                outerSmallCircles={outerSmallCircles}
+                innerRadius={innerRadius}
+                outerRadius={outerRadius}
+                centerX={centerX}
+                centerY={centerY}
+                startingAngle={startingAngle}
+                innerAngleStep={innerAngleStep}
+                outerAngleStep={outerAngleStep}
+              />
         <circle
           cx="150"
           cy="150"

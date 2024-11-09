@@ -1,0 +1,11 @@
+.line {
+    stroke-dasharray: 1000;  /* Set a large value to allow the animation to complete */
+    stroke-dashoffset: 1000; /* Initially hide the line */
+    animation: drawLine 5s ease forwards;
+  }
+  
+  @keyframes drawLine {
+    to {
+      stroke-dashoffset: 0; /* Draw the line by reducing the dash offset */
+    }
+  }
