@@ -1,19 +1,22 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import data from "../API/API"; // Import your mock data
 import "./CircleWithSmallCircles.css";
+import { swapCirclesUtil } from "../utils/utils";
 
 const CircleWithSmallCircles = () => {
   const [activeFilter, setActiveFilter] = useState(null);
-  const [innerSmallCircles, setInnerSmallCircles] = useState(() =>
+  const [innerSmallCircles, setInnerCircles] = useState(() =>
     data.map((item) => item.name)
   );
-  const [outerSmallCircles, setOuterSmallCircles] = useState(() =>
+  const [outerSmallCircles, setOuterCircles] = useState(() =>
     Array.from(
       new Set(data.flatMap((item) => [...item.mainSkills, ...item.otherSkills]))
     )
   );
   const [lines, setLines] = useState([]);
   const [activeSkills, setActiveSkills] = useState([]);
+
+  //circles
 
   const innerRadius = 55;
   const outerRadius = 130;
@@ -25,105 +28,85 @@ const CircleWithSmallCircles = () => {
   const outerAngleStep = (2 * Math.PI) / outerSmallCircles.length;
   const startingAngle = -Math.PI / 2; // Set the starting angle
 
-  const calculateClosestCircles = (filter, circlesNumber) => {};
+  //find close circles
 
-  useEffect(() => {
-    if (!activeFilter) {
-      setLines([]);
-      return;
-    }
+  const calculateClosestCircles = (activeFilter, circlesNumber) => {
+    const innerIndex = innerSmallCircles.indexOf(activeFilter);
+    const innerAngle = startingAngle + innerIndex * innerAngleStep;
+    const innerX = centerX + innerRadius * Math.cos(innerAngle);
+    const innerY = centerY + innerRadius * Math.sin(innerAngle);
 
+    const distances = outerSmallCircles.map((skill, index) => {
+      const outerAngle = startingAngle + index * outerAngleStep;
+      const outerX = centerX + outerRadius * Math.cos(outerAngle);
+      const outerY = centerY + outerRadius * Math.sin(outerAngle);
+
+      const distance = Math.sqrt(
+        Math.pow(outerX - innerX, 2) + Math.pow(outerY - innerY, 2)
+      );
+      return { skill, distance };
+    });
+
+    distances.sort((a, b) => a.distance - b.distance);
+    return distances.slice(0, circlesNumber).map((item) => item.skill);
+  };
+
+  //swap circles
+
+  const swapCircles = (activeFilter) => {
+    console.log(activeFilter);
     if (innerSmallCircles.includes(activeFilter)) {
       const selectedItem = data.find((item) => item.name === activeFilter);
-      if (selectedItem) {
-        const { mainSkills, otherSkills } = selectedItem;
-        setActiveSkills([...mainSkills, ...otherSkills]);
-        const skillsNumber = mainSkills.length + otherSkills.length;
+      const { mainSkills, otherSkills } = selectedItem;
+      const skillsNumber = mainSkills.length + otherSkills.length;
+      const closestCircles = calculateClosestCircles(
+        activeFilter,
+        skillsNumber
+      );
+      const filteredClose = closestCircles.filter(
+        (item) => ![...mainSkills, ...otherSkills].includes(item)
+      );
+      const filteredSkills = [...mainSkills, ...otherSkills].filter(
+        (item) => !closestCircles.includes(item)
+      );
 
-        const innerIndex = innerSmallCircles.indexOf(activeFilter);
-        const innerAngle = startingAngle + innerIndex * innerAngleStep;
-        const innerX = centerX + innerRadius * Math.cos(innerAngle);
-        const innerY = centerY + innerRadius * Math.sin(innerAngle);
+      const outerSmallCirclesArr = swapCirclesUtil(
+        outerSmallCircles,
+        filteredClose,
+        filteredSkills
+      );
 
-        const distances = outerSmallCircles.map((skill, index) => {
-          const outerAngle = startingAngle + index * outerAngleStep;
-          const outerX = centerX + outerRadius * Math.cos(outerAngle);
-          const outerY = centerY + outerRadius * Math.sin(outerAngle);
-
-          const distance = Math.sqrt(
-            Math.pow(outerX - innerX, 2) + Math.pow(outerY - innerY, 2)
-          );
-          return { skill, distance };
-        });
-
-        distances.sort((a, b) => a.distance - b.distance);
-        const closestCircles = distances
-          .slice(0, skillsNumber)
-          .map((item) => item.skill);
-
-        const filteredClose = closestCircles.filter(
-          (item) => ![...mainSkills, ...otherSkills].includes(item)
-        );
-        const filteredSkills = [...mainSkills, ...otherSkills].filter(
-          (item) => !closestCircles.includes(item)
-        );
-
-        const outerSmallCirclesArr = [...outerSmallCircles];
-        for (let i = 0; i < filteredClose.length; i++) {
-          const close = outerSmallCirclesArr.indexOf(filteredClose[i]);
-          const skill = outerSmallCirclesArr.indexOf(filteredSkills[i]);
-          let temp = outerSmallCirclesArr[close];
-          outerSmallCirclesArr[close] = outerSmallCirclesArr[skill];
-          outerSmallCirclesArr[skill] = temp;
-        }
-
-        setOuterSmallCircles(outerSmallCirclesArr);
-        setLines([
-          ...mainSkills.map((relatedSkill) => {
-            const outerIndex = outerSmallCirclesArr.indexOf(relatedSkill);
-            const outerAngle = startingAngle + outerIndex * outerAngleStep;
-            const outerX = centerX + outerRadius * Math.cos(outerAngle);
-            const outerY = centerY + outerRadius * Math.sin(outerAngle);
-
-            const controlX = (innerX + outerX) / 2 + 20;
-            const controlY = (innerY + outerY) / 2;
-
-            return (
-              <path
-                key={`line-main-${relatedSkill}`}
-                d={`M ${innerX} ${innerY} Q ${controlX} ${controlY}, ${outerX} ${outerY}`}
-                className="line"
-                stroke="#FF7A00"
-                strokeWidth="1"
-                fill="none"
-              />
-            );
-          }),
-          ...otherSkills.map((relatedSkill) => {
-            const outerIndex = outerSmallCirclesArr.indexOf(relatedSkill);
-            const outerAngle = startingAngle + outerIndex * outerAngleStep;
-            const outerX = centerX + outerRadius * Math.cos(outerAngle);
-            const outerY = centerY + outerRadius * Math.sin(outerAngle);
-
-            const controlX = (innerX + outerX) / 2 - 20;
-            const controlY = (innerY + outerY) / 2;
-
-            return (
-              <path
-                key={`line-other-${relatedSkill}`}
-                d={`M ${innerX} ${innerY} Q ${controlX} ${controlY}, ${outerX} ${outerY}`}
-                className="line"
-                stroke="purple"
-                strokeWidth="1"
-                fill="none"
-              />
-            );
-          }),
-        ]);
-      }
+      setOuterCircles(outerSmallCirclesArr);
     } else if (outerSmallCircles.includes(activeFilter)) {
+      const relatedJobsMain = data
+        .filter((item) => item.mainSkills.includes(activeFilter))
+        .map((item) => item.name);
+
+      const relatedJobsOther = data
+        .filter((item) => item.otherSkills.includes(activeFilter))
+        .map((item) => item.name);
+
+      const closestJobCircles = calculateClosestCircles(
+        activeFilter,
+        relatedJobsMain.length + relatedJobsOther.length
+      );
+      console.log(relatedJobsMain, relatedJobsOther);
+      console.log(closestJobCircles);
+
+    /*   const innerSmallCirclesArr = swapCirclesUtil(
+        innerSmallCircles,
+        closestJobCircles,
+        [...relatedJobsMain, relatedJobsOther]
+      );
+
+      setInnerCircles(innerSmallCirclesArr); */
     }
-  }, [activeFilter]);
+  };
+
+  const handleFilterChange = (filter) => {
+    setActiveFilter(filter);
+    swapCircles(filter);
+  };
 
   return (
     <div className="container">
@@ -186,7 +169,7 @@ const CircleWithSmallCircles = () => {
                   cy={y}
                   r={smallCircleRadius}
                   fill="#ADADAD" // Gray fill when not selected
-                  onClick={() => setActiveFilter(name)}
+                  onClick={() => handleFilterChange(name)}
                 />
               )}
               <text
@@ -260,7 +243,7 @@ const CircleWithSmallCircles = () => {
                   cy={y}
                   r={smallCircleRadius}
                   fill={related ? "#FF7A00" : "#FFD4AD"} // Gray fill when not selected
-                  onClick={() => setActiveFilter(skill)}
+                  onClick={() => handleFilterChange(skill)}
                 />
               )}
               <text
