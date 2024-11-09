@@ -37,15 +37,20 @@ const LinesBetweenCircles = ({
 
   const lines = [];
 
-  const createCurvedPath = (start, end, color, index) => {
+  const createCurvedPath = (start, end, color,index) => {
+
+    
+    const curveSetting = start.x === 117.67181112391398 ? -4 : 4
+
+    
     const controlX1 = (start.x + end.x) / 2;
-    const controlY1 = start.y - Math.abs(start.x - end.x) / 342;
+    const controlY1 = start.y - Math.abs(start.x - end.x) / curveSetting; 
     const controlX2 = (start.x + end.x) / 2;
-    const controlY2 = end.y + Math.abs(start.x - end.x) / 457;
+    const controlY2 = end.y + Math.abs(start.x - end.x) / 457; 
 
     return (
       <path
-        key={`line-${index}-${start.x}-${start.y}-${end.x}-${end.y}`}
+      key={`line-${index}-${start.x}-${start.y}-${end.x}-${end.y}`}
         className="line"
         d={`M ${start.x},${start.y} C ${controlX1},${controlY1} ${controlX2},${controlY2} ${end.x},${end.y}`}
         stroke={color}
@@ -59,7 +64,7 @@ const LinesBetweenCircles = ({
     const innerIndex = innerSmallCircles.indexOf(activeFilter);
     const innerPos = calculatePosition(innerIndex, innerRadius, innerAngleStep);
 
-    activeItem.mainSkills.forEach((skill, index) => {
+    activeItem.mainSkills.forEach((skill,index) => {
       const outerIndex = outerSmallCircles.indexOf(skill);
       if (outerIndex !== -1) {
         const outerPos = calculatePosition(
@@ -67,11 +72,11 @@ const LinesBetweenCircles = ({
           outerRadius,
           outerAngleStep
         );
-        lines.push(createCurvedPath(innerPos, outerPos, "#FF7A00", index));
+        lines.push(createCurvedPath(innerPos, outerPos, "#FF7A00",index));
       }
     });
 
-    activeItem.otherSkills.forEach((skill, index) => {
+    activeItem.otherSkills.forEach((skill,index) => {
       const outerIndex = outerSmallCircles.indexOf(skill);
       if (outerIndex !== -1) {
         const outerPos = calculatePosition(
@@ -79,7 +84,7 @@ const LinesBetweenCircles = ({
           outerRadius,
           outerAngleStep
         );
-        lines.push(createCurvedPath(innerPos, outerPos, "#9C27B0", index));
+        lines.push(createCurvedPath(innerPos, outerPos, "#9C27B0",index));
       }
     });
   }
