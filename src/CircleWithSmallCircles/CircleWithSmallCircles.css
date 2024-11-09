@@ -1,4 +1,5 @@
 .container {
+ 
   width: 100%;
   height: 100%;
   display: flex;
@@ -6,7 +7,16 @@
   justify-content: center;
 }
 
+svg {
+  padding: 0;
+  margin: 0;
+}
+
 circle {
   cursor: pointer;
   transition: 1s;
+}
+
+.circle-text {
+  transition: fill 5s ease; /* Adjust the timing as needed */
 }

@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 import data from "../API/API"; // Import your mock data
 import "./CircleWithSmallCircles.css";
-import { swapCirclesUtil } from "../utils/utils";
+import { swapCirclesUtil, getTextPosition } from "../utils/utils";
 import LinesBetweenCircles from "../LinesBetweenCircles/LinesBetweemCircles";
 
 const CircleWithSmallCircles = () => {
@@ -123,8 +123,8 @@ const CircleWithSmallCircles = () => {
     <div className="container">
       <svg
         width="90%"
-        height="90%"
-        viewBox="0 0 300 300"
+        height="80%"
+        viewBox="0 -3 300 300"
         preserveAspectRatio="xMidYMid meet"
       >
         <LinesBetweenCircles
@@ -162,6 +162,9 @@ const CircleWithSmallCircles = () => {
           const x = centerX + innerRadius * Math.cos(angle);
           const y = centerY + innerRadius * Math.sin(angle);
           const selected = name === activeFilter;
+          console.log(x, name);
+          const { textAnchor, dx, dy } = getTextPosition(angle, "inner");
+          const type = "inner";
 
           return (
             <g key={`inner-${index}`}>
@@ -198,11 +201,19 @@ const CircleWithSmallCircles = () => {
               <text
                 x={x}
                 y={y - smallCircleRadius - 5}
-                textAnchor="middle"
+                textAnchor={textAnchor}
                 fontSize="6"
                 fill="black"
               >
-                {name}
+                {name.split(" ").map((item, i) => (
+                  <tspan
+                    key={i}
+                    x={x} // Align horizontally
+                    dy={i === 0 ? "0em" : "1.5em"} // Vertical spacing for each line, adjust this for proper line spacing
+                  >
+                    {item}
+                  </tspan>
+                ))}
               </text>
             </g>
           );
@@ -214,51 +225,7 @@ const CircleWithSmallCircles = () => {
           const selected = skill === activeFilter;
           const related = relatedSkills.includes(skill);
 
-          
-          
-          let textAnchor = "";
-          let dy = 0;
-          let dx = 0;
-
-          if (x === 150) {
-            dx = '0';
-            dy = "-6%";
-            textAnchor = 'center'
-          } else if (x === 135.94452760488758) {
-            dx = '-2%';
-            dy = "6%";
-            textAnchor = 'center'
-          } else if (x === 20.190656199353896) {
-            dx = "-6%";
-            dy = "0";
-            textAnchor = 'end'
-          } else if (x === 279.8093438006461) {
-            dx = "6%";
-            dy = "0";
-            textAnchor = 'center'
-          }
-          // Determine text position based on angle
-          else if (angle >= 0 && angle < Math.PI / 2) {
-            // Bottom-right quadrant
-            textAnchor = "start";
-            dy = "6%";
-            dx = "1em";
-          } else if (angle >= Math.PI / 2 && angle < Math.PI) {
-            // Bottom-left quadrant
-            textAnchor = "end";
-            dy = "6%";
-            dx = "-1em";
-          } else if (angle >= Math.PI && angle < (3 * Math.PI) / 2) {
-            // Top-left quadrant
-            textAnchor = "end";
-            dy = "-2.5em";
-            dx = "-1em";
-          } else {
-            // Top-right quadrant
-            textAnchor = "start";
-            dy = "-2.5em";
-            dx = "1em";
-          }
+          const { textAnchor, dx, dy } = getTextPosition(angle);
 
           return (
             <g key={`outer-${index}`}>
@@ -293,13 +260,14 @@ const CircleWithSmallCircles = () => {
                 />
               )}
               <text
+                className="circle-text"
                 x={x}
                 y={y}
                 textAnchor={textAnchor}
                 dy={dy}
                 dx={dx}
                 fontSize="6"
-                fill={related ? '#3A3A3A' : '#ADADAD'}
+                fill={related ? "#3A3A3A" : "#ADADAD"}
               >
                 {skill}
               </text>
@@ -307,11 +275,6 @@ const CircleWithSmallCircles = () => {
           );
         })}
       </svg>
-      {activeFilter && (
-        <p style={{ position: "absolute", top: 10, left: 10 }}>
-          Selected Filter: {activeFilter}
-        </p>
-      )}
     </div>
   );
 };
