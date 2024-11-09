@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import data from "../API/API"; // Import your mock data
 import "./CircleWithSmallCircles.css";
 import { swapCirclesUtil } from "../utils/utils";
@@ -14,8 +14,18 @@ const CircleWithSmallCircles = () => {
       new Set(data.flatMap((item) => [...item.mainSkills, ...item.otherSkills]))
     )
   );
-  const [lines, setLines] = useState([]);
-  const [activeSkills, setActiveSkills] = useState([]);
+
+  //get related skills
+
+  const relatedSkills = useMemo(() => {
+    if (innerSmallCircles.includes(activeFilter)) {
+      const job = data.find((job) => job.name === activeFilter);
+      return [...job.mainSkills, ...job.otherSkills];
+    }
+
+    return [];
+  }, [activeFilter, innerSmallCircles]);
+  console.log(relatedSkills);
 
   //circles
 
@@ -111,7 +121,6 @@ const CircleWithSmallCircles = () => {
 
   return (
     <div className="container">
-      
       <svg
         width="90%"
         height="90%"
@@ -119,18 +128,18 @@ const CircleWithSmallCircles = () => {
         preserveAspectRatio="xMidYMid meet"
       >
         <LinesBetweenCircles
-                data={data}
-                activeFilter={activeFilter}
-                innerSmallCircles={innerSmallCircles}
-                outerSmallCircles={outerSmallCircles}
-                innerRadius={innerRadius}
-                outerRadius={outerRadius}
-                centerX={centerX}
-                centerY={centerY}
-                startingAngle={startingAngle}
-                innerAngleStep={innerAngleStep}
-                outerAngleStep={outerAngleStep}
-              />
+          data={data}
+          activeFilter={activeFilter}
+          innerSmallCircles={innerSmallCircles}
+          outerSmallCircles={outerSmallCircles}
+          innerRadius={innerRadius}
+          outerRadius={outerRadius}
+          centerX={centerX}
+          centerY={centerY}
+          startingAngle={startingAngle}
+          innerAngleStep={innerAngleStep}
+          outerAngleStep={outerAngleStep}
+        />
         <circle
           cx="150"
           cy="150"
@@ -147,7 +156,6 @@ const CircleWithSmallCircles = () => {
           stroke="#ADADAD"
           strokeWidth="2"
         />
-        {lines}
 
         {innerSmallCircles.map((name, index) => {
           const angle = startingAngle + index * innerAngleStep; // Apply startingAngle
@@ -204,29 +212,52 @@ const CircleWithSmallCircles = () => {
           const x = centerX + outerRadius * Math.cos(angle);
           const y = centerY + outerRadius * Math.sin(angle);
           const selected = skill === activeFilter;
-          const related = activeSkills.includes(skill);
+          const related = relatedSkills.includes(skill);
 
-          // Adjust text positioning based on angle
-          let textAnchor = "middle";
+          
+          
+          let textAnchor = "";
           let dy = 0;
+          let dx = 0;
 
+          if (x === 150) {
+            dx = '0';
+            dy = "-6%";
+            textAnchor = 'center'
+          } else if (x === 135.94452760488758) {
+            dx = '-2%';
+            dy = "6%";
+            textAnchor = 'center'
+          } else if (x === 20.190656199353896) {
+            dx = "-6%";
+            dy = "0";
+            textAnchor = 'end'
+          } else if (x === 279.8093438006461) {
+            dx = "6%";
+            dy = "0";
+            textAnchor = 'center'
+          }
           // Determine text position based on angle
-          if (angle >= 0 && angle < Math.PI / 2) {
+          else if (angle >= 0 && angle < Math.PI / 2) {
             // Bottom-right quadrant
             textAnchor = "start";
-            dy = "1em";
+            dy = "6%";
+            dx = "1em";
           } else if (angle >= Math.PI / 2 && angle < Math.PI) {
             // Bottom-left quadrant
             textAnchor = "end";
-            dy = "1em";
+            dy = "6%";
+            dx = "-1em";
           } else if (angle >= Math.PI && angle < (3 * Math.PI) / 2) {
             // Top-left quadrant
             textAnchor = "end";
-            dy = "-0.5em";
+            dy = "-2.5em";
+            dx = "-1em";
           } else {
             // Top-right quadrant
             textAnchor = "start";
-            dy = "-0.5em";
+            dy = "-2.5em";
+            dx = "1em";
           }
 
           return (
@@ -266,8 +297,9 @@ const CircleWithSmallCircles = () => {
                 y={y}
                 textAnchor={textAnchor}
                 dy={dy}
+                dx={dx}
                 fontSize="6"
-                fill="black"
+                fill={related ? '#3A3A3A' : '#ADADAD'}
               >
                 {skill}
               </text>
