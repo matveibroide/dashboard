@@ -15,19 +15,16 @@ const CircleWithSmallCircles = () => {
     )
   );
 
-  //get related skills
-
+  // Get related skills
   const relatedSkills = useMemo(() => {
     if (innerSmallCircles.includes(activeFilter)) {
       const job = data.find((job) => job.name === activeFilter);
       return [...job.mainSkills, ...job.otherSkills];
     }
-
     return [];
   }, [activeFilter, innerSmallCircles]);
-  console.log(relatedSkills);
 
-  //circles
+  //circles settings
 
   const innerRadius = 55;
   const outerRadius = 130;
@@ -35,11 +32,11 @@ const CircleWithSmallCircles = () => {
   const centerX = 150;
   const centerY = 150;
 
+  //angle settings
+
   const innerAngleStep = (2 * Math.PI) / innerSmallCircles.length;
   const outerAngleStep = (2 * Math.PI) / outerSmallCircles.length;
-  const startingAngle = -Math.PI / 2; // Set the starting angle
-
-  //find close circles
+  const startingAngle = -Math.PI / 2;
 
   const calculateClosestCircles = (activeFilter, circlesNumber) => {
     const innerIndex = innerSmallCircles.indexOf(activeFilter);
@@ -62,10 +59,7 @@ const CircleWithSmallCircles = () => {
     return distances.slice(0, circlesNumber).map((item) => item.skill);
   };
 
-  //swap circles
-
   const swapCircles = (activeFilter) => {
-    console.log(activeFilter);
     if (innerSmallCircles.includes(activeFilter)) {
       const selectedItem = data.find((item) => item.name === activeFilter);
       const { mainSkills, otherSkills } = selectedItem;
@@ -88,29 +82,6 @@ const CircleWithSmallCircles = () => {
       );
 
       setOuterCircles(outerSmallCirclesArr);
-    } else if (outerSmallCircles.includes(activeFilter)) {
-      const relatedJobsMain = data
-        .filter((item) => item.mainSkills.includes(activeFilter))
-        .map((item) => item.name);
-
-      const relatedJobsOther = data
-        .filter((item) => item.otherSkills.includes(activeFilter))
-        .map((item) => item.name);
-
-      const closestJobCircles = calculateClosestCircles(
-        activeFilter,
-        relatedJobsMain.length + relatedJobsOther.length
-      );
-      console.log(relatedJobsMain, relatedJobsOther);
-      console.log(closestJobCircles);
-
-      /*   const innerSmallCirclesArr = swapCirclesUtil(
-        innerSmallCircles,
-        closestJobCircles,
-        [...relatedJobsMain, relatedJobsOther]
-      );
-
-      setInnerCircles(innerSmallCirclesArr); */
     }
   };
 
@@ -140,53 +111,59 @@ const CircleWithSmallCircles = () => {
           innerAngleStep={innerAngleStep}
           outerAngleStep={outerAngleStep}
         />
+
         <circle
-          cx="150"
-          cy="150"
+          cx={centerX}
+          cy={centerY}
           r={innerRadius}
           fill="none"
           stroke="#ADADAD"
           strokeWidth="2"
         />
         <circle
-          cx="150"
-          cy="150"
+          cx={centerX}
+          cy={centerY}
           r={outerRadius}
           fill="none"
           stroke="#ADADAD"
           strokeWidth="2"
         />
+      
 
+        {/* Inner Circles */}
         {innerSmallCircles.map((name, index) => {
-          const angle = startingAngle + index * innerAngleStep; // Apply startingAngle
+          const angle = startingAngle + index * innerAngleStep;
           const x = centerX + innerRadius * Math.cos(angle);
           const y = centerY + innerRadius * Math.sin(angle);
           const selected = name === activeFilter;
-          console.log(x, name);
-          const { textAnchor, dx, dy } = getTextPosition(angle, "inner");
-          const type = "inner";
+
+          const textX = centerX + 75 * Math.cos(angle);
+          const textY = centerY + 75 * Math.sin(angle);
+          const angleDegrees = (angle * 180) / Math.PI;
+          const textAnchor =
+            angleDegrees > 90 && angleDegrees < 270 ? "end" : "start";
 
           return (
             <g key={`inner-${index}`}>
               {selected ? (
                 <svg>
-                  {/* Outer Circle (First colored border) */}
+                  {/* Outer Circle (Border) */}
                   <circle
                     cx={x}
                     cy={y}
-                    r={smallCircleRadius + 1} // Adjust the radius to make the border visible
+                    r={smallCircleRadius + 1}
                     fill="none"
-                    stroke="#00A372" // Green border for selected state
-                    strokeWidth="1" // Outer border width
+                    stroke="#00A372"
+                    strokeWidth="1"
                   />
-                  {/* Inner Circle (Second colored border) */}
+                  {/* Inner Circle (Selected) */}
                   <circle
                     cx={x}
                     cy={y}
-                    r={smallCircleRadius} // Original small circle radius
-                    fill="#00A372" // Green fill when selected
-                    stroke="#fff" // White border inside the green
-                    strokeWidth="2" // Inner border width
+                    r={smallCircleRadius}
+                    fill="#00A372"
+                    stroke="#fff"
+                    strokeWidth="2"
                   />
                 </svg>
               ) : (
@@ -194,60 +171,71 @@ const CircleWithSmallCircles = () => {
                   cx={x}
                   cy={y}
                   r={smallCircleRadius}
-                  fill="#ADADAD" // Gray fill when not selected
+                  fill="#ADADAD"
                   onClick={() => handleFilterChange(name)}
                 />
               )}
+              {/* Adjusted Text positioned outside the circle */}
               <text
-                x={x}
-                y={y - smallCircleRadius - 5}
+                x={textX}
+                y={textY}
                 textAnchor={textAnchor}
                 fontSize="6"
                 fill="black"
+                dy="-12" // Push the text up by 12px to prevent overlap with the circle
               >
-                {name.split(" ").map((item, i) => (
-                  <tspan
-                    key={i}
-                    x={x} // Align horizontally
-                    dy={i === 0 ? "0em" : "1.5em"} // Vertical spacing for each line, adjust this for proper line spacing
-                  >
-                    {item}
-                  </tspan>
-                ))}
+                {name.length > 16
+                  ? name.split(" ").map((item, i) => (
+                      <tspan
+                        key={i}
+                        x={textX}
+                        textY = {textY}
+                        dy={i === 0 ? "0em" : "1.5em"} // Add space between lines
+                      >
+                        {item}
+                      </tspan>
+                    ))
+                  : name}
               </text>
             </g>
           );
         })}
+
+        {/* Outer Circles */}
         {outerSmallCircles.map((skill, index) => {
-          const angle = startingAngle + index * outerAngleStep; // Apply startingAngle
+          const angle = startingAngle + index * outerAngleStep;
           const x = centerX + outerRadius * Math.cos(angle);
           const y = centerY + outerRadius * Math.sin(angle);
           const selected = skill === activeFilter;
           const related = relatedSkills.includes(skill);
 
-          const { textAnchor, dx, dy } = getTextPosition(angle);
+          const textX = centerX + 147 * Math.cos(angle);
+          const textY = centerY + 147 * Math.sin(angle);
+          const angleDegrees = (angle * 180) / Math.PI;
+          const textAnchor =
+            angleDegrees > 90 && angleDegrees < 270 ? "end" : "start";
 
           return (
             <g key={`outer-${index}`}>
               {selected ? (
                 <svg>
-                  {/* Outer Circle (First colored border) */}
+                  {/* Outer Circle (Border) */}
                   <circle
                     cx={x}
                     cy={y}
-                    r={smallCircleRadius + 1} // Adjust the radius to make the border visible
+                    r={smallCircleRadius + 1}
                     fill="none"
-                    stroke="#FF7A00" // Green border for selected state
-                    strokeWidth="1" // Outer border width
+                    stroke="#FF7A00"
+                    strokeWidth="1"
                   />
-                  {/* Inner Circle (Second colored border) */}
+                  {/* Inner Circle (Selected) */}
                   <circle
                     cx={x}
                     cy={y}
-                    r={smallCircleRadius} // Original small circle radius
-                    fill="#FF7A00" // Green fill when selected
-                    stroke="#fff" // White border inside the green
-                    strokeWidth="2" // Inner border width
+                    r={smallCircleRadius}
+                    fill="#FF7A00"
+                    stroke="#fff"
+                    strokeWidth="2"
                   />
                 </svg>
               ) : (
@@ -255,17 +243,15 @@ const CircleWithSmallCircles = () => {
                   cx={x}
                   cy={y}
                   r={smallCircleRadius}
-                  fill={related ? "#FF7A00" : "#FFD4AD"} // Gray fill when not selected
+                  fill={related ? "#FF7A00" : "#FFD4AD"}
                   onClick={() => handleFilterChange(skill)}
                 />
               )}
+              {/* Adjusted Text positioned outside the circle */}
               <text
-                className="circle-text"
-                x={x}
-                y={y}
+                x={textX}
+                y={textY}
                 textAnchor={textAnchor}
-                dy={dy}
-                dx={dx}
                 fontSize="6"
                 fill={related ? "#3A3A3A" : "#ADADAD"}
               >

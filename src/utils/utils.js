@@ -92,7 +92,7 @@ export const getTextPosition = (angle, type) => {
 
   const isInnerType = type === "inner";
   const baseDx = isInnerType ? "5.5em" : "1em";
-  const baseDy = isInnerType ? "5em" : "2em";
+  const baseDy = isInnerType ? "5em" : "3em";
 
   if (angle >= 0 && angle < Math.PI / 2) {
     // Bottom-right quadrant
