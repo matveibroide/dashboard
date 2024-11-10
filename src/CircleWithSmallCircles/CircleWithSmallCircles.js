@@ -38,7 +38,14 @@ const CircleWithSmallCircles = () => {
   const outerAngleStep = (2 * Math.PI) / outerSmallCircles.length;
   const startingAngle = -Math.PI / 2;
 
-  const calculateClosestCircles = (activeFilter, circlesNumber, filterArr, findClosestArr,angleStep, angleStepSearched) => {
+  const calculateClosestCircles = (
+    activeFilter,
+    circlesNumber,
+    filterArr,
+    findClosestArr,
+    angleStep,
+    angleStepSearched
+  ) => {
     const innerIndex = filterArr.indexOf(activeFilter);
     const innerAngle = startingAngle + innerIndex * angleStep;
     const innerX = centerX + innerRadius * Math.cos(innerAngle);
@@ -72,6 +79,7 @@ const CircleWithSmallCircles = () => {
         innerAngleStep,
         outerAngleStep
       );
+      
       const filteredClose = closestCircles.filter(
         (item) => ![...mainSkills, ...otherSkills].includes(item)
       );
@@ -82,21 +90,47 @@ const CircleWithSmallCircles = () => {
       const outerSmallCirclesArr = swapCirclesUtil(
         outerSmallCircles,
         filteredClose,
-        filteredSkills,
-        outerAngleStep,
-        innerAngleStep
+        filteredSkills
       );
 
       setOuterCircles(outerSmallCirclesArr);
-    }
+    } else if (outerSmallCircles.includes(activeFilter)) {
+      const jobs = data
+        .filter(
+          (item) =>
+            item.mainSkills.includes(activeFilter) ||
+            item.otherSkills.includes(activeFilter)
+        )
+        .map((item) => item.name);
 
-    else if (outerSmallCircles.includes(activeFilter)) {
-      const jobsMain = data.filter(item => item.mainSkills.includes(activeFilter))
-      const jobsOther = data.filter(item => item.otherSkills.includes(activeFilter))
-      const jobsAmount = jobsMain.length + jobsOther.length
-      const closestCircles = calculateClosestCircles(activeFilter, jobsAmount,outerSmallCircles,innerSmallCircles)
-      console.log(closestCircles)
+      const jobsAmount = jobs.length;
+      const closestCircles = calculateClosestCircles(
+        activeFilter,
+        jobsAmount,
+        outerSmallCircles,
+        innerSmallCircles
+      );
 
+      console.log("Closest circles", closestCircles);
+
+      const filteredClose = closestCircles.filter(
+        (item) => !jobs.includes(item)
+      );
+      const filteredJobs = jobs.filter(
+        (item) => !closestCircles.includes(item)
+      );
+
+      const updatedInnerCirclesArr = swapCirclesUtil(
+        innerSmallCircles,
+        filteredClose,
+        filteredJobs
+      );
+
+      setInnerCircles(updatedInnerCirclesArr)
+
+     
+      /* console.log("Jobs Main:", jobs); */
+      
     }
   };
 
@@ -127,7 +161,6 @@ const CircleWithSmallCircles = () => {
           startingAngle={startingAngle}
           innerAngleStep={innerAngleStep}
           outerAngleStep={outerAngleStep}
-          
         />
 
         <circle
