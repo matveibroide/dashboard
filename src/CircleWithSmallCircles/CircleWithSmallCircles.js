@@ -188,11 +188,11 @@ const CircleWithSmallCircles = () => {
 
         {/* Inner Circles */}
         {innerSmallCircles.map((name, index) => {
+          let related;
           const angle = startingAngle + index * innerAngleStep;
           const x = centerX + innerRadius * Math.cos(angle);
           const y = centerY + innerRadius * Math.sin(angle);
           const selected = name === activeFilter;
-
           const textX = centerX + 75 * Math.cos(angle);
           const textY = centerY + 75 * Math.sin(angle);
           const angleDegrees = (angle * 180) / Math.PI;
@@ -205,6 +205,15 @@ const CircleWithSmallCircles = () => {
 
           const labels = name.split(" ");
           const updatedLabels = [];
+          const relatedJobs = data
+            .filter(
+              (item) =>
+                item.mainSkills.includes(activeFilter) ||
+                item.otherSkills.includes(activeFilter)
+            )
+            .map((item) => item.name);
+
+            related = relatedJobs.includes(name)
 
           for (let i = 0; i < labels.length; i++) {
             let str = "";
@@ -247,7 +256,7 @@ const CircleWithSmallCircles = () => {
                   cx={x}
                   cy={y}
                   r={smallCircleRadius}
-                  fill="#ADADAD"
+                  fill={related ? "#00A372" : "#ADADAD"}
                   onClick={() => handleFilterChange(name)}
                 />
               )}
