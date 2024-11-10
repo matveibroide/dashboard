@@ -85,6 +85,8 @@ const CircleWithSmallCircles = () => {
     }
   };
 
+  //handle change of the filter
+
   const handleFilterChange = (filter) => {
     setActiveFilter(filter);
     swapCircles(filter);
@@ -128,7 +130,6 @@ const CircleWithSmallCircles = () => {
           stroke="#ADADAD"
           strokeWidth="2"
         />
-      
 
         {/* Inner Circles */}
         {innerSmallCircles.map((name, index) => {
@@ -140,8 +141,28 @@ const CircleWithSmallCircles = () => {
           const textX = centerX + 75 * Math.cos(angle);
           const textY = centerY + 75 * Math.sin(angle);
           const angleDegrees = (angle * 180) / Math.PI;
-          const textAnchor =
+          let textAnchor =
             angleDegrees > 90 && angleDegrees < 270 ? "end" : "start";
+
+          if (y === 95 || y === 95 + innerRadius * 2) {
+            textAnchor = "middle";
+          }
+
+          const labels = name.split(" ");
+          const updatedLabels = [];
+
+          for (let i = 0; i < labels.length; i++) {
+            let str = "";
+            if (labels[i + 1] != undefined && labels[i + 1].length <= 3) {
+              str = `${labels[i]} ${labels[i + 1]}`;
+              updatedLabels.push(str);
+            } else if (labels[i].length <= 3) {
+              continue;
+            } else {
+              str = labels[i];
+              updatedLabels.push(str);
+            }
+          }
 
           return (
             <g key={`inner-${index}`}>
@@ -185,11 +206,11 @@ const CircleWithSmallCircles = () => {
                 dy="-12" // Push the text up by 12px to prevent overlap with the circle
               >
                 {name.length > 16
-                  ? name.split(" ").map((item, i) => (
+                  ? updatedLabels.map((item, i) => (
                       <tspan
                         key={i}
                         x={textX}
-                        textY = {textY}
+                        textY={textY}
                         dy={i === 0 ? "0em" : "1.5em"} // Add space between lines
                       >
                         {item}
@@ -212,8 +233,12 @@ const CircleWithSmallCircles = () => {
           const textX = centerX + 147 * Math.cos(angle);
           const textY = centerY + 147 * Math.sin(angle);
           const angleDegrees = (angle * 180) / Math.PI;
-          const textAnchor =
+          let textAnchor =
             angleDegrees > 90 && angleDegrees < 270 ? "end" : "start";
+
+          if (y === 20 || y === 20 + innerRadius * 2) {
+            textAnchor = "middle";
+          }
 
           return (
             <g key={`outer-${index}`}>
