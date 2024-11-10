@@ -44,17 +44,19 @@ const CircleWithSmallCircles = () => {
     filterArr,
     findClosestArr,
     angleStep,
-    angleStepSearched
+    angleStepSearched,
+    filterRadius,
+    searchedCirclesRadius
   ) => {
     const innerIndex = filterArr.indexOf(activeFilter);
     const innerAngle = startingAngle + innerIndex * angleStep;
-    const innerX = centerX + innerRadius * Math.cos(innerAngle);
-    const innerY = centerY + innerRadius * Math.sin(innerAngle);
+    const innerX = centerX + filterRadius * Math.cos(innerAngle);
+    const innerY = centerY + filterRadius * Math.sin(innerAngle);
 
     const distances = findClosestArr.map((skill, index) => {
       const outerAngle = startingAngle + index * angleStepSearched;
-      const outerX = centerX + outerRadius * Math.cos(outerAngle);
-      const outerY = centerY + outerRadius * Math.sin(outerAngle);
+      const outerX = centerX + searchedCirclesRadius * Math.cos(outerAngle);
+      const outerY = centerY + searchedCirclesRadius * Math.sin(outerAngle);
 
       const distance = Math.sqrt(
         Math.pow(outerX - innerX, 2) + Math.pow(outerY - innerY, 2)
@@ -65,6 +67,8 @@ const CircleWithSmallCircles = () => {
     distances.sort((a, b) => a.distance - b.distance);
     return distances.slice(0, circlesNumber).map((item) => item.skill);
   };
+
+  // swap circles
 
   const swapCircles = (activeFilter) => {
     if (innerSmallCircles.includes(activeFilter)) {
@@ -77,9 +81,11 @@ const CircleWithSmallCircles = () => {
         innerSmallCircles,
         outerSmallCircles,
         innerAngleStep,
-        outerAngleStep
+        outerAngleStep,
+        innerRadius,
+        outerRadius
       );
-      
+
       const filteredClose = closestCircles.filter(
         (item) => ![...mainSkills, ...otherSkills].includes(item)
       );
@@ -108,7 +114,11 @@ const CircleWithSmallCircles = () => {
         activeFilter,
         jobsAmount,
         outerSmallCircles,
-        innerSmallCircles
+        innerSmallCircles,
+        outerAngleStep,
+        innerAngleStep,
+        outerRadius,
+        innerRadius
       );
 
       console.log("Closest circles", closestCircles);
@@ -126,11 +136,7 @@ const CircleWithSmallCircles = () => {
         filteredJobs
       );
 
-      setInnerCircles(updatedInnerCirclesArr)
-
-     
-      /* console.log("Jobs Main:", jobs); */
-      
+      setInnerCircles(updatedInnerCirclesArr);
     }
   };
 
