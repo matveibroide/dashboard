@@ -38,14 +38,14 @@ const CircleWithSmallCircles = () => {
   const outerAngleStep = (2 * Math.PI) / outerSmallCircles.length;
   const startingAngle = -Math.PI / 2;
 
-  const calculateClosestCircles = (activeFilter, circlesNumber) => {
-    const innerIndex = innerSmallCircles.indexOf(activeFilter);
-    const innerAngle = startingAngle + innerIndex * innerAngleStep;
+  const calculateClosestCircles = (activeFilter, circlesNumber, filterArr, findClosestArr,angleStep, angleStepSearched) => {
+    const innerIndex = filterArr.indexOf(activeFilter);
+    const innerAngle = startingAngle + innerIndex * angleStep;
     const innerX = centerX + innerRadius * Math.cos(innerAngle);
     const innerY = centerY + innerRadius * Math.sin(innerAngle);
 
-    const distances = outerSmallCircles.map((skill, index) => {
-      const outerAngle = startingAngle + index * outerAngleStep;
+    const distances = findClosestArr.map((skill, index) => {
+      const outerAngle = startingAngle + index * angleStepSearched;
       const outerX = centerX + outerRadius * Math.cos(outerAngle);
       const outerY = centerY + outerRadius * Math.sin(outerAngle);
 
@@ -66,7 +66,11 @@ const CircleWithSmallCircles = () => {
       const skillsNumber = mainSkills.length + otherSkills.length;
       const closestCircles = calculateClosestCircles(
         activeFilter,
-        skillsNumber
+        skillsNumber,
+        innerSmallCircles,
+        outerSmallCircles,
+        innerAngleStep,
+        outerAngleStep
       );
       const filteredClose = closestCircles.filter(
         (item) => ![...mainSkills, ...otherSkills].includes(item)
@@ -78,10 +82,21 @@ const CircleWithSmallCircles = () => {
       const outerSmallCirclesArr = swapCirclesUtil(
         outerSmallCircles,
         filteredClose,
-        filteredSkills
+        filteredSkills,
+        outerAngleStep,
+        innerAngleStep
       );
 
       setOuterCircles(outerSmallCirclesArr);
+    }
+
+    else if (outerSmallCircles.includes(activeFilter)) {
+      const jobsMain = data.filter(item => item.mainSkills.includes(activeFilter))
+      const jobsOther = data.filter(item => item.otherSkills.includes(activeFilter))
+      const jobsAmount = jobsMain.length + jobsOther.length
+      const closestCircles = calculateClosestCircles(activeFilter, jobsAmount,outerSmallCircles,innerSmallCircles)
+      console.log(closestCircles)
+
     }
   };
 
@@ -112,6 +127,7 @@ const CircleWithSmallCircles = () => {
           startingAngle={startingAngle}
           innerAngleStep={innerAngleStep}
           outerAngleStep={outerAngleStep}
+          
         />
 
         <circle
