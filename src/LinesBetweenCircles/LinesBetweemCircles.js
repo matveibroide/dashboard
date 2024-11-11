@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import "./LinesBetweenCircles.css";
-import { line } from "d3";
 
 const LinesBetweenCircles = ({
   data,
@@ -24,30 +23,31 @@ const LinesBetweenCircles = ({
       item.otherSkills.includes(activeFilter)
   );
 
-  if (activeItem) {
-    console.log(activeItem);
-  }
-
   if (!activeItem) return null;
 
-  // Function to calculate circle position
-  const calculatePosition = (index, radius, angleStep) => {
+  const innerCircleOffset = 5; // Offset to prevent overlap
+
+  const calculatePosition = (index, radius, angleStep, offset = 0) => {
     const angle = startingAngle + index * angleStep;
     return {
-      x: centerX + radius * Math.cos(angle),
-      y: centerY + radius * Math.sin(angle),
+      x: centerX + (radius + offset) * Math.cos(angle),
+      y: centerY + (radius + offset) * Math.sin(angle),
     };
   };
 
   const lines = [];
+  //problem: tilda
+  const createCurvedPath = (start, end, color, index, type) => {
+    let curveSetting = start.y < centerY ? 4 : -4;
+    let controlX1 = (start.x + end.x) / 2;
+    let controlY1 = start.y - Math.abs(start.x - end.x) / curveSetting;
+    let controlX2 = (start.x + end.x) / 2;
+    let controlY2 = end.y + Math.abs(start.x - end.x) / 457;
 
-  const createCurvedPath = (start, end, color, index) => {
-    const curveSetting = start.x === 117.67181112391398 ? -4 : 4;
-
-    const controlX1 = (start.x + end.x) / 2;
-    const controlY1 = start.y - Math.abs(start.x - end.x) / curveSetting;
-    const controlX2 = (start.x + end.x) / 2;
-    const controlY2 = end.y + Math.abs(start.x - end.x) / 457;
+    if (type === "outer") {
+      controlY1 = start.y + Math.abs(start.x - end.x) / -4;
+      controlY2 = end.y + Math.abs(start.x - end.x) / 457;
+    }
 
     return (
       <path
@@ -63,16 +63,12 @@ const LinesBetweenCircles = ({
 
   if (innerSmallCircles.includes(activeFilter)) {
     const innerIndex = innerSmallCircles.indexOf(activeFilter);
-    const innerPos = calculatePosition(innerIndex, innerRadius, innerAngleStep);
+    const innerPos = calculatePosition(innerIndex, innerRadius, innerAngleStep, innerCircleOffset);
 
     activeItem.mainSkills.forEach((skill, index) => {
       const outerIndex = outerSmallCircles.indexOf(skill);
       if (outerIndex !== -1) {
-        const outerPos = calculatePosition(
-          outerIndex,
-          outerRadius,
-          outerAngleStep
-        );
+        const outerPos = calculatePosition(outerIndex, outerRadius, outerAngleStep);
         lines.push(createCurvedPath(innerPos, outerPos, "#FF7A00", index));
       }
     });
@@ -80,11 +76,7 @@ const LinesBetweenCircles = ({
     activeItem.otherSkills.forEach((skill, index) => {
       const outerIndex = outerSmallCircles.indexOf(skill);
       if (outerIndex !== -1) {
-        const outerPos = calculatePosition(
-          outerIndex,
-          outerRadius,
-          outerAngleStep
-        );
+        const outerPos = calculatePosition(outerIndex, outerRadius, outerAngleStep);
         lines.push(createCurvedPath(innerPos, outerPos, "#9C27B0", index));
       }
     });
@@ -92,40 +84,25 @@ const LinesBetweenCircles = ({
     const outerIndex = outerSmallCircles.indexOf(activeFilter);
     const outerPos = calculatePosition(outerIndex, outerRadius, outerAngleStep);
 
-    const jobsMain = data
-      .filter((item) => item.mainSkills.includes(activeFilter))
-      .map((item) => item.name);
-
-    const jobsOther = data
-      .filter((item) => item.otherSkills.includes(activeFilter))
-      .map((item) => item.name);
+    const jobsMain = data.filter((item) => item.mainSkills.includes(activeFilter)).map((item) => item.name);
+    const jobsOther = data.filter((item) => item.otherSkills.includes(activeFilter)).map((item) => item.name);
 
     jobsMain.forEach((job, index) => {
       const innerIndex = innerSmallCircles.indexOf(job);
       if (innerIndex !== -1) {
-        const innerPos = calculatePosition(
-          innerIndex,
-          innerRadius,
-          innerAngleStep
-        );
-        lines.push(createCurvedPath(outerPos, innerPos, "#FF7A00", index));
+        const innerPos = calculatePosition(innerIndex, innerRadius, innerAngleStep, innerCircleOffset);
+        lines.push(createCurvedPath(outerPos, innerPos, "#FF7A00", index, "outer"));
       }
     });
 
     jobsOther.forEach((job, index) => {
       const innerIndex = innerSmallCircles.indexOf(job);
       if (innerIndex !== -1) {
-        const innerPos = calculatePosition(
-          innerIndex,
-          innerRadius,
-          innerAngleStep
-        );
-        lines.push(createCurvedPath(outerPos, innerPos, "#9C27B0", index));
+        const innerPos = calculatePosition(innerIndex, innerRadius, innerAngleStep, innerCircleOffset);
+        lines.push(createCurvedPath(outerPos, innerPos, "#9C27B0", index, "outer"));
       }
     });
   }
-
-  console.log(lines);
 
   return <g>{lines}</g>;
 };
