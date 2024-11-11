@@ -203,6 +203,8 @@ const CircleWithSmallCircles = () => {
             textAnchor = "middle";
           }
 
+          
+
           const labels = name.split(" ");
           const updatedLabels = [];
           const relatedJobs = data
@@ -260,14 +262,14 @@ const CircleWithSmallCircles = () => {
                   onClick={() => handleFilterChange(name)}
                 />
               )}
-              {/* Adjusted Text positioned outside the circle */}
+              
               <text
                 x={textX}
                 y={textY}
                 textAnchor={textAnchor}
                 fontSize="6"
                 fill="black"
-                dy="-12" // Push the text up by 12px to prevent overlap with the circle
+                dy={labels.length === 1 ? '-4' : '-12'} 
               >
                 {name.length > 16
                   ? updatedLabels.map((item, i) => (
