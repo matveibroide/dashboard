@@ -1,10 +1,10 @@
 import React, { useMemo, useState } from "react";
-import data from "../API/API"; // Import your mock data
-import "./CircleWithSmallCircles.css";
-import { swapCirclesUtil, getTextPosition } from "../utils/utils";
+import data from "../API/API"; // importing mock data
+import "./Dashboard.css";
+import { swapCirclesUtil } from "../utils/utils";
 import LinesBetweenCircles from "../LinesBetweenCircles/LinesBetweemCircles";
 
-const CircleWithSmallCircles = () => {
+const Dashboard = () => {
   const [activeFilter, setActiveFilter] = useState(null);
   const [innerSmallCircles, setInnerCircles] = useState(() =>
     data.map((item) => item.name)
@@ -121,8 +121,6 @@ const CircleWithSmallCircles = () => {
         innerRadius
       );
 
-      console.log("Closest circles", closestCircles);
-
       const filteredClose = closestCircles.filter(
         (item) => !jobs.includes(item)
       );
@@ -203,8 +201,6 @@ const CircleWithSmallCircles = () => {
             textAnchor = "middle";
           }
 
-          
-
           const labels = name.split(" ");
           const updatedLabels = [];
           const relatedJobs = data
@@ -215,11 +211,11 @@ const CircleWithSmallCircles = () => {
             )
             .map((item) => item.name);
 
-            related = relatedJobs.includes(name)
+          related = relatedJobs.includes(name);
 
           for (let i = 0; i < labels.length; i++) {
             let str = "";
-            if (labels[i + 1] != undefined && labels[i + 1].length <= 3) {
+            if (labels[i + 1] !== undefined && labels[i + 1].length <= 3) {
               str = `${labels[i]} ${labels[i + 1]}`;
               updatedLabels.push(str);
             } else if (labels[i].length <= 3) {
@@ -262,14 +258,14 @@ const CircleWithSmallCircles = () => {
                   onClick={() => handleFilterChange(name)}
                 />
               )}
-              
+
               <text
                 x={textX}
                 y={textY}
                 textAnchor={textAnchor}
                 fontSize="6"
                 fill="black"
-                dy={labels.length === 1 ? '-4' : '-12'} 
+                dy={labels.length === 1 ? "-4" : "-12"}
               >
                 {name.length > 16
                   ? updatedLabels.map((item, i) => (
@@ -356,4 +352,4 @@ const CircleWithSmallCircles = () => {
   );
 };
 
-export default CircleWithSmallCircles;
+export default Dashboard;

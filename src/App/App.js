@@ -1,11 +1,11 @@
 import React from "react";
 import "./App.css";
-import CircleWithSmallCircles from "../CircleWithSmallCircles/CircleWithSmallCircles";
+import Dashboard from "../Dashboard/Dashboard";
 
 const App = () => {
   return (
     <div className="App">
-      <CircleWithSmallCircles />
+      <Dashboard/>
     </div>
   );
 };

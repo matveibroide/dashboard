@@ -36,7 +36,7 @@ const LinesBetweenCircles = ({
   };
 
   const lines = [];
-  //problem: tilda
+  
   const createCurvedPath = (start, end, color, index, type) => {
     let curveSetting = start.y < centerY ? 4 : -4;
     let controlX1 = (start.x + end.x) / 2;

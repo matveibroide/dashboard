@@ -43,35 +43,3 @@ export const calculateClosestCircles = (
   distances.sort((a, b) => a.distance - b.distance);
   return distances.slice(0, circlesNumber).map((item) => item.circle);
 };
-
-export const getTextPosition = (angle, type) => {
-  let textAnchor, dx, dy;
-
-  const isInnerType = type === "inner";
-  const baseDx = isInnerType ? "5.5em" : "1em";
-  const baseDy = isInnerType ? "5em" : "3em";
-
-  if (angle >= 0 && angle < Math.PI / 2) {
-    // Bottom-right quadrant
-    textAnchor = "start";
-    dx = baseDx;
-    dy = baseDy;
-  } else if (angle >= Math.PI / 2 && angle < Math.PI) {
-    // Bottom-left quadrant
-    textAnchor = "end";
-    dx = `-${baseDx}`;
-    dy = baseDy;
-  } else if (angle >= Math.PI && angle < (3 * Math.PI) / 2) {
-    // Top-left quadrant
-    textAnchor = "end";
-    dx = `-${baseDx}`;
-    dy = `-${baseDy}`;
-  } else {
-    // Top-right quadrant
-    textAnchor = "start";
-    dx = baseDx;
-    dy = `-${baseDy}`;
-  }
-
-  return { textAnchor, dx, dy };
-};
